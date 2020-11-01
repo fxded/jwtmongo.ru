@@ -1,0 +1,34 @@
+{
+  "name": "jwtmongo.ru",
+  "version": "1.0.0",
+  "description": "explore how use jwt on nodejs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devStart": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/fxded/jwtmongo.ru.git"
+  },
+  "keywords": [
+    "jwt",
+    "mongo",
+    "ejs",
+    "route"
+  ],
+  "author": "Votintseff Vasiliy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fxded/jwtmongo.ru/issues"
+  },
+  "homepage": "https://github.com/fxded/jwtmongo.ru#readme",
+  "dependencies": {
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.11"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  }
+}
