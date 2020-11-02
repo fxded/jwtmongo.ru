@@ -4,6 +4,7 @@ const os = require('os');
 const port = process.env.PORT || 3010;
 const authRoutes = require('./routes/authRoutes');
 const cookieParser = require('cookie-parser');
+const { requireAuth, checkUser } = require('./middleware/authMiddleware');
 
 const app = express();
 
@@ -26,8 +27,9 @@ mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCr
   .catch((err) => console.log(err));
 
 // routes
+app.get('*', checkUser);
 app.get('/', (req, res) => res.render('home'));
-app.get('/smoothies', (req, res) => res.render('smoothies'));
+app.get('/profile', requireAuth, (req, res) => res.render('profile'));
 app.use(authRoutes);
 
 /*/cookies

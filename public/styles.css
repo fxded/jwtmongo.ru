@@ -30,7 +30,7 @@ nav ul{
   align-items: center;
 }
 nav li{
-  margin-left: 20px;
+  margin-left: 40px;
 }
 nav li a{
   text-transform: uppercase;
@@ -41,7 +41,7 @@ nav li a{
   letter-spacing: 2px;
 }
 .btn{
-  border-radius: 36px;
+  border-radius: 30px;
   background: #FEE996;
 }
 form h2{
@@ -70,7 +70,7 @@ label{
 }
 button{
   margin-top: 30px;
-  border-radius: 36px;
+  border-radius: 30px;
   background: #FEE996;
   border:0;
   text-transform: uppercase;
