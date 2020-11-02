@@ -8,10 +8,10 @@ document.querySelector('#pl').onclick = () => {
 
 const myFetch = (url) => {
         let user = {
-            email: 'xded@mail.ru',
+            email: 'xded2@mail.com',
             password: 'P@$$w0rd'
         };
-    console.log(`POST ${url}, ${JSON.stringify(user)}`);
+    console.log(`---POST ${url}, ${JSON.stringify(user)}`);
     fetch(url, {
         method: 'POST',
         headers: {
@@ -20,8 +20,11 @@ const myFetch = (url) => {
         body: JSON.stringify(user)
     })
     .then(res => {
+        return res.json();
         if (res.ok) return res.json();
-        throw new Error('Request is failed!');
-    }, networkError => console.log(networkError.message))
-    .then(jsonResponse => console.log(jsonResponse));
+        console.log(res);
+        throw new Error(res.status);
+    })
+    .then(jsonResponse => console.log('-----', jsonResponse))
+    .catch(networkError => console.log('++++++',networkError));
 }
