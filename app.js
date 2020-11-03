@@ -18,7 +18,12 @@ app.set('view engine', 'ejs');
 
 // database connection
 const dbURI = 'mongodb+srv://jwtnodeuser:48FPKq8fUiF2brtl@cluster0.wz4dw.mongodb.net/jwtdb';
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex:true })
+mongoose.connect(dbURI, { 
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex:true,
+    useFindAndModify: false
+  })
   .then((result) => app.listen(3010))
   .then(() => {
         let userName = os.userInfo().username;

@@ -15,6 +15,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please enter an password'],
     minlength: [6, 'Minimum password length is 6 character']
+  },
+  reftoken: {
+      type: String
   }
 });
 
@@ -26,8 +29,12 @@ userSchema.pre('save', async function(next) {
 });
 
 //static method to login user
-userSchema.statics.login = async function(email, password) {
-    const user = await this.findOne({ email });
+userSchema.statics.login = async function(email, password, reftoken) {
+    const user = await this.findOneAndUpdate(
+        { email },
+        { $set : { reftoken }},
+        {}
+    );
     if (user) {
         const auth = await bcrypt.compare(password, user.password);
         if (auth) {
@@ -37,6 +44,19 @@ userSchema.statics.login = async function(email, password) {
     }
     throw Error('incorrect email');
 };
+
+//static method to logout user
+userSchema.statics.logout = async function(_id) {
+    const user = await this.findByIdAndUpdate(
+        { _id },
+        { $set : { reftoken: '' }}
+    );
+    if (!user) {
+        throw Error('Wrong user');
+    } else {
+        console.log(`${user.email} logout`);
+    }
+}
 
 const User = mongoose.model('user', userSchema);
 

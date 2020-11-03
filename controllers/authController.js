@@ -1,6 +1,10 @@
+//  controllers/authController.js
+
 // controller actions
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { createRefreshToken, createToken } = require('./handleTokens');
+const config = require('../config/config');
 
 //handle errors
 const handleErrors = (err) => {
@@ -33,12 +37,6 @@ const handleErrors = (err) => {
     return errors;
 }
 
-const maxAge = 3 * 24 * 60 * 60;
-const createToken = (id) => {
-    return jwt.sign({ id }, 'just a secret phrase', {
-        expiresIn: maxAge
-    });
-}
 
 module.exports.signup_get = (req, res) => {
   res.render('signup');
@@ -52,9 +50,11 @@ module.exports.signup_post = async (req, res) => {
   const { email, password } = req.body;
   
   try {
-      const user = await User.create({ email, password });
+      const refToken = await createRefreshToken(email)
+      const user = await User.create({ email, password, refToken });
       const token = createToken(user._id);
-      res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+      res.cookie('jwt', token, { httpOnly: true, maxAge: config.tenMinutes });
+      res.cookie('reftk', refToken, { httpOnly: true, maxAge: config.aMonth * 1000 });
       res.status(201).json({ user: user._id });
   }
   catch (err) {
@@ -63,27 +63,45 @@ module.exports.signup_post = async (req, res) => {
       res.status(400).json({ errors });
   }
   console.log(email, password);
-  //res.send({ res: 'new signup'});
 }
 
 module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
   
   try{
-      const user = await User.login(email, password);
+      const refToken = await createRefreshToken(email);
+      const user = await User.login(email, password, refToken);
       const token = createToken(user._id);
-      res.cookie('jwt', token, { httpOnly: true, maxAge: maxAge * 1000 });
+      res.cookie('jwt', token, { httpOnly: true, maxAge: config.tenMinutes });
+      res.cookie('reftk', refToken, { httpOnly: true, maxAge: config.aMonth * 1000 });
       res.status(200).json({ user: user._id });
   } catch (err) {
       const errors = handleErrors(err);
       console.log(`--------loginUserErr: ${JSON.stringify( errors )}, ${err}`);
       res.status(400).json({ errors });
   }
-  //console.log(email, password);
-  //res.send({res: 'user login'});
 }
 
-module.exports.logout_get = (req, res) => {
-    res.cookie('jwt', '', { maxAge: 1 });
-    res.redirect('/');
+module.exports.logout_get = async (req, res) => {
+  const token = req.cookies.jwt;
+
+  res.cookie('jwt', '', { maxAge: 1 });
+  res.cookie('reftk', '', { maxAge: 1 });
+  
+  // check json web token exists & is verified
+  if (token) {
+    jwt.verify(token, config.tPhrase, async (err, decodedToken) => {
+      if (err) {
+        console.log(err.message);
+      } else {
+        console.log(decodedToken);
+        try {
+            let user = await User.logout(decodedToken.id);
+        } catch (err) {
+            console.log('----logoutUserError', err);
+        }
+      }
+    });
+  }
+  res.redirect('/');
 }
