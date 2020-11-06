@@ -3,9 +3,9 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 
-const createToken = (id) => {
+const createToken = (user) => {
     return jwt.sign({ 
-        id,
+        user,
         domain: 'jwtmongo.ru',
         path: '/'
     }, config.tPhrase, {

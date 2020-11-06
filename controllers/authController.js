@@ -1,10 +1,11 @@
 //  controllers/authController.js
 
 // controller actions
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const { createRefreshToken, createToken } = require('./handleTokens');
-const config = require('../config/config');
+const   User    = require('../models/User');
+const   jwt     = require('jsonwebtoken');
+const   { createRefreshToken, createToken } = require('./handleTokens');
+const   config  = require('../config/config');
+const   fs      = require('fs');
 
 //handle errors
 const handleErrors = (err) => {
@@ -50,11 +51,12 @@ module.exports.signup_post = async (req, res) => {
   const { email, password } = req.body;
   
   try {
-      const refToken = await createRefreshToken(email)
-      const user = await User.create({ email, password, refToken });
-      const token = createToken(user._id);
+      const reftoken = await createRefreshToken(email);
+      const user = await User.create({ email, password, reftoken });
+      console.log('----signUp', user, reftoken);
+      const token = await createToken(user);
       res.cookie('jwt', token, { httpOnly: true, maxAge: config.tenMinutes });
-      res.cookie('reftk', refToken, { httpOnly: true, maxAge: config.aMonth * 1000 });
+      res.cookie('reftk', reftoken, { httpOnly: true, maxAge: config.aMonth * 1000 });
       res.status(201).json({ user: user._id });
   }
   catch (err) {
@@ -71,7 +73,7 @@ module.exports.login_post = async (req, res) => {
   try{
       const refToken = await createRefreshToken(email);
       const user = await User.login(email, password, refToken);
-      const token = createToken(user._id);
+      const token = await createToken(user);
       res.cookie('jwt', token, { httpOnly: true, maxAge: config.tenMinutes });
       res.cookie('reftk', refToken, { httpOnly: true, maxAge: config.aMonth * 1000 });
       res.status(200).json({ user: user._id });
@@ -96,12 +98,41 @@ module.exports.logout_get = async (req, res) => {
       } else {
         console.log(decodedToken);
         try {
-            let user = await User.logout(decodedToken.id);
+            let user = await User.logout(decodedToken.user._id);
         } catch (err) {
+            const errors = handleErrors(err);
+            res.status(400).json({ errors });
             console.log('----logoutUserError', err);
         }
       }
     });
   }
   res.redirect('/');
+}
+
+module.exports.fileupload_put = async (req, res) => {
+    const   user        = res.locals.user,
+            dataFile    = req.files.file,
+            filePath    = __dirname.split('/').slice(0,4).join('/')
+                        + '/userdata/'
+                        + user._id 
+                        +'/';
+    try {
+        if (!fs.existsSync(filePath)){
+            const dir = await fs.promises.mkdir(filePath);
+            console.log(filePath, 'created---------------- success')
+        }
+        const userFile = await dataFile.mv(filePath + dataFile.name);
+        //console.log('---userFile', userFile);
+        //res.writeHead(303, { Connection: 'close', Location: '/' });
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({ errors });
+        console.error('----uploaderr',err);
+    }
+    
+    console.log('----uploads files', dataFile, user._id, filePath);
+    //res.status(200).json({ user: user._id });
+    res.render('profile');
+    //res.end()
 }

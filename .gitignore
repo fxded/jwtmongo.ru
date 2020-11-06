@@ -3,7 +3,7 @@ node_modules/
 
 # Ignore user data
 #data/
-public/file/
+userdata/
 
 # Ignore Logs
 logs

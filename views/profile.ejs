@@ -1,36 +1,83 @@
 <%- include('partials/header'); -%>
 
-<ul class="recipes">
-  <li class="recipe">
-    <img src="/favicon.ico" alt="file icon">
-    <h4>Banana Boost</h4>
-    <p>Banana, Vanilla ice cream, Milk</p>
-  </li>
-  <li class="recipe">
-    <img src="/favicon.ico" alt="file icon">
-    <h4>Tropical Twist</h4>
-    <p>Peach, Pinapple, Apple juice</p>
-  </li>
-  <li class="recipe">
-    <img src="/favicon.ico" alt="file icon">
-    <h4>Protein Packer</h4>
-    <p>Oats, Peanut butter, Milk, Banana, Blueberries</p>
-  </li>
-  <li class="recipe">
-    <img src="/favicon.ico" alt="file icon">
-    <h4>Banana Boost</h4>
-    <p>Banana, Vanilla ice cream, Milk</p>
-  </li>
-  <li class="recipe">
-    <img src="/favicon.ico" alt="file icon">
-    <h4>Tropical Twist</h4>
-    <p>Peach, Pinapple, Apple juice</p>
-  </li>
-  <li class="recipe">
-    <img src="/favicon.ico" alt="file icon">
-    <h4>Protein Packer</h4>
-    <p>Oats, Peanut butter, Milk, Banana, Blueberries</p>
-  </li>
-</ul>
+    <div class="dada">
+        <label for="myfile" class="chous">
+            <!--Here you can choice a file for upload (less than 5 mb)-->
+            Выбирите файл для загрузки (не более 5 Mb)
+        </label>
+        <input type="file" class="my" id="myfile" name="myfile" onchange="fileInputChange(this)"/>
+    </div>
+    <div class="dada">
+        <span id="upload" class="chous">
+            <!--Upload the selected file-->
+            Загрузить выбранный файл
+        </span>
+    </div>
+    <div class="dada">
+        <span id="getList" class="chous">
+            <!--Get a list of your files-->
+            Список загруженных файлов
+        </span>
+    </div>
 
 <%- include('partials/footer'); -%>
+
+<script>
+
+    
+    function fileInputChange(input) {
+        var text = (input.files.length > 0 && input.files[0].size < 1024 * 1024 * 5) 
+            ? input.files[0].name 
+            : 'Here you can choice a file for upload (less than 5 mb)';
+        input.parentNode.getElementsByTagName('label')[0].innerText = text;
+        console.log(input.files, input.files[0].size, user );
+    }
+
+    document.querySelector('#upload').onclick = async () => {
+        const userId = '<%= user._id %>';
+        const myInput = document.querySelector('#myfile');
+        if (myInput.files[0]) {
+            console.log('myInput', 
+                        myInput.files[0].name,
+                        document.querySelector('#user').innerHTML,
+                        userId
+                    );
+            const formData = new FormData();
+            formData.append('user', document.querySelector('#user').innerHTML);
+            formData.append('userID', userId);
+            formData.append('file', myInput.files[0]);
+            try {
+                const response = await fetch('/fileUpload', {
+                    method: 'PUT',
+                    body: formData,
+                });
+                //const result = await response.json();
+                const result = await response;
+                console.log('Успех:', result);
+                //console.log('Успех:', JSON.stringify(result));
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+    }
+
+    document.querySelector('#getList').onclick = async () => {
+        let table = document.querySelector('#tbody'), row;
+            try {
+                const response = await fetch('/getList', {
+                    method: 'GET',
+                });
+                const result = await response.json();
+                //const result = await response;
+                console.log('Успех:', result);
+                table.innerHTML = '';
+                result.queryData.forEach(item => {
+                    row = table.insertRow();
+                    row.insertCell().innerHTML = item.path_file;
+                })
+                //console.log('Успех:', JSON.stringify(result));
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+    }
+</script>
