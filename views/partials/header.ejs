@@ -21,3 +21,18 @@
     </ul>
   </nav>
   <!--script src="/script.js"></script-->
+<script>
+    
+    document.querySelector('#user').onclick = async () => {
+        try {
+            const response = await fetch('/info', {
+                method: 'GET',
+            });
+            const result = await response.json();
+            console.log('/Info Успех:', result);
+        } catch (error) {
+            console.error('/Info oшибка:', error);
+        }
+
+    }
+</script>

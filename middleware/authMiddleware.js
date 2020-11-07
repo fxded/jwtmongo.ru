@@ -29,7 +29,7 @@ const requireAuth = async (req, res, next) => {
           const user = await User.findOne({ email: decodedRefToken.email });
           //console.log('----test1', user, refToken, config.tPhrase);
           if (user.reftoken === refToken) {
-            const reftoken = await createRefreshToken({user});
+            const reftoken = await createRefreshToken(user.email);
             const token = await createToken(user);
             res.cookie('jwt', token, { httpOnly: true, maxAge: config.tenMinutes });
             res.cookie('reftk', reftoken, { httpOnly: true, maxAge: config.aMonth * 10000 });

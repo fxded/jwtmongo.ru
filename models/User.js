@@ -1,7 +1,21 @@
+// models/User
+
 const mongoose = require('mongoose');
 const { isEmail } = require('validator');
 const bcrypt = require('bcrypt');
 
+// create fileInfo Schema
+const FileInfoSchema = new mongoose.Schema({
+    userFiles: [{
+        name: String,
+        ext: String,
+        mime: String,
+        size: Number,
+        data: Date
+    }]
+});
+
+// create user Schema
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -18,7 +32,8 @@ const userSchema = new mongoose.Schema({
   },
   reftoken: {
       type: String
-  }
+  },
+  userfiles: FileInfoSchema
 });
 
 // fire a function before doc saved to db

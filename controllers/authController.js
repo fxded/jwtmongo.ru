@@ -38,7 +38,6 @@ const handleErrors = (err) => {
     return errors;
 }
 
-
 module.exports.signup_get = (req, res) => {
   res.render('signup');
 }
@@ -71,11 +70,11 @@ module.exports.login_post = async (req, res) => {
   const { email, password } = req.body;
   
   try{
-      const refToken = await createRefreshToken(email);
-      const user = await User.login(email, password, refToken);
+      const reftoken = await createRefreshToken(email);
+      const user = await User.login(email, password, reftoken);
       const token = await createToken(user);
       res.cookie('jwt', token, { httpOnly: true, maxAge: config.tenMinutes });
-      res.cookie('reftk', refToken, { httpOnly: true, maxAge: config.aMonth * 1000 });
+      res.cookie('reftk', reftoken, { httpOnly: true, maxAge: config.aMonth * 1000 });
       res.status(200).json({ user: user._id });
   } catch (err) {
       const errors = handleErrors(err);
@@ -108,6 +107,12 @@ module.exports.logout_get = async (req, res) => {
     });
   }
   res.redirect('/');
+}
+
+module.exports.info_get = async (req, res) => {
+    const user = res.locals.user;
+    console.log('---------reqGetInfo', user);
+    res.status(200).json({ user });
 }
 
 module.exports.fileupload_put = async (req, res) => {
