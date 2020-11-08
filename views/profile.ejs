@@ -23,7 +23,17 @@
 <%- include('partials/footer'); -%>
 
 <script>
-
+    const getFilesList = async () => {
+        try {
+            const response = await fetch ('/file/list', {
+                method: 'GET'
+            });
+            const result = await response.json();
+            console.log('----getList', result);
+        } catch (err) {
+            console.log('---getListerror', err);
+        }
+    }
     
     function fileInputChange(input) {
         var text = (input.files.length > 0 && input.files[0].size < 1024 * 1024 * 5) 
@@ -48,7 +58,7 @@
             formData.append('file', myInput.files[0]);
             try {
                 const response = await fetch('/fileUpload', {
-                    method: 'PUT',
+                    method: 'POST',
                     body: formData,
                 });
                 //const result = await response.json();
@@ -62,7 +72,7 @@
     }
 
     document.querySelector('#getList').onclick = async () => {
-        let table = document.querySelector('#tbody'), row;
+     /*   let table = document.querySelector('#tbody'), row;
             try {
                 const response = await fetch('/getList', {
                     method: 'GET',
@@ -78,6 +88,9 @@
                 //console.log('Успех:', JSON.stringify(result));
             } catch (error) {
                 console.error('Ошибка:', error);
-            }
+            }*/
+     getFilesList();
     }
+    
+    //getFilesList();
 </script>

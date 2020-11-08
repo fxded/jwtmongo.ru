@@ -112,32 +112,6 @@ module.exports.logout_get = async (req, res) => {
 module.exports.info_get = async (req, res) => {
     const user = res.locals.user;
     console.log('---------reqGetInfo', user);
-    res.status(200).json({ user });
+    res.status(200).json({ id:user.email });
 }
 
-module.exports.fileupload_put = async (req, res) => {
-    const   user        = res.locals.user,
-            dataFile    = req.files.file,
-            filePath    = __dirname.split('/').slice(0,4).join('/')
-                        + '/userdata/'
-                        + user._id 
-                        +'/';
-    try {
-        if (!fs.existsSync(filePath)){
-            const dir = await fs.promises.mkdir(filePath);
-            console.log(filePath, 'created---------------- success')
-        }
-        const userFile = await dataFile.mv(filePath + dataFile.name);
-        //console.log('---userFile', userFile);
-        //res.writeHead(303, { Connection: 'close', Location: '/' });
-    } catch (err) {
-        const errors = handleErrors(err);
-        res.status(400).json({ errors });
-        console.error('----uploaderr',err);
-    }
-    
-    console.log('----uploads files', dataFile, user._id, filePath);
-    //res.status(200).json({ user: user._id });
-    res.render('profile');
-    //res.end()
-}

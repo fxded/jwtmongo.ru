@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 const FileInfoSchema = new mongoose.Schema({
     userFiles: [{
         name: String,
-        ext: String,
+        ext : String,
         mime: String,
         size: Number,
         data: Date
@@ -33,7 +33,13 @@ const userSchema = new mongoose.Schema({
   reftoken: {
       type: String
   },
-  userfiles: FileInfoSchema
+  userfiles: [{
+        name: String,
+        ext : String,
+        mime: String,
+        size: Number,
+        data: Date
+    }] //FileInfoSchema
 });
 
 // fire a function before doc saved to db
