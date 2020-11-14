@@ -42,13 +42,15 @@ const handleErrors = (err) => {
 }
 
 
-module.exports.fileupload_post = async (req, res) => {
+module.exports.fileUpload_post = async (req, res) => {
     const   user        = res.locals.user,
             dataFile    = req.files.file,
             filePath    = __dirname.split('/').slice(0,4).join('/')
                         + '/userdata/'
                         + user._id 
                         +'/';
+    let updatedUser;
+    
     try {
         if (!fs.existsSync(filePath)){
             const dir = await fs.promises.mkdir(filePath);
@@ -64,8 +66,8 @@ module.exports.fileupload_post = async (req, res) => {
             size    : dataFile.size,
             data    : new Date()
         });
-        const user2Mongo = await userMongo.save();
-        console.log('---mongoUser', user2Mongo);
+        updatedUser = await userMongo.save();
+        console.log('---mongoUser', updatedUser);
         //res.writeHead(303, { Connection: 'close', Location: '/' });
     } catch (err) {
         const errors = handleErrors(err);
@@ -74,9 +76,45 @@ module.exports.fileupload_post = async (req, res) => {
     }
     
     console.log('----uploads files', dataFile, user._id, filePath);
-    //res.status(200).json({ user: user._id });
-    res.render('profile');
+    res.status(200).json({ list: updatedUser.userfiles });
+    //res.render('profile');
     //res.end()
+}
+
+module.exports.fileUpdate_put = async (req, res) => {
+    const   dataFile    = req.files.file,
+            filePath    = __dirname.split('/').slice(0,4).join('/')
+                        + '/userdata/'
+                        + res.locals.user._id 
+                        +'/';
+    let     userMongo;
+    
+    try {
+        await dataFile.mv(filePath + dataFile.name);
+        const updFileList = res.locals.user.userfiles.map(item => {
+            if (item._id === req.params.id) {
+                item.size = dataFile.size;
+                item.mime = dataFile.mimetype;
+                item.data = new Date();
+                console.log('--updateFileINARR', item);
+            }
+            return item;
+        });
+        const userMongo = await User.findById(res.locals.user._id);
+        userMongo.userfiles = updFileList;
+        updatedUser = await userMongo.save();
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({ errors });
+        console.error('----updateFileErr',err);
+    }
+    console.log('---fileUpdate',req.params.id, req.files.file);
+    res.send({  
+        id: req.params.id,
+        user: updatedUser._id,
+        list: updatedUser.userfiles
+    });
+    res.end();
 }
 
 module.exports.filesList_get = async (req, res) => {

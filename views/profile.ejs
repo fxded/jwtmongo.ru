@@ -23,6 +23,18 @@
 <%- include('partials/footer'); -%>
 
 <script>
+    let fileList = [];
+    
+    window.onload = async () => {
+        try {
+            fileList = await getFilesList();
+            console.log('----userFileList is:', fileList);
+        } catch (err) {
+            console.log('===getfileListErr');
+        }
+    }
+    
+    
     const getFilesList = async () => {
         try {
             const response = await fetch ('/file/list', {
@@ -30,6 +42,7 @@
             });
             const result = await response.json();
             console.log('----getList', result);
+            return result.list;
         } catch (err) {
             console.log('---getListerror', err);
         }
@@ -56,13 +69,24 @@
             formData.append('user', document.querySelector('#user').innerHTML);
             formData.append('userID', userId);
             formData.append('file', myInput.files[0]);
+            const fileExist = fileList.filter(item => item.name === myInput.files[0].name);
+            let response;
+            console.log('--ifExitst',fileExist);
             try {
-                const response = await fetch('/fileUpload', {
-                    method: 'POST',
-                    body: formData,
-                });
+                if (fileExist[0]) {
+                    response = await fetch ('/file/update/'+ fileExist[0]._id, {
+                        method: 'PUT',
+                        body: formData,
+                    });
+                } else {
+                    response = await fetch('/file/upload', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                }
                 //const result = await response.json();
-                const result = await response;
+                const result = await response.json();
+                fileList = result.list;
                 console.log('Успех:', result);
                 //console.log('Успех:', JSON.stringify(result));
             } catch (error) {
@@ -93,4 +117,7 @@
     }
     
     //getFilesList();
+
 </script>
+
+
