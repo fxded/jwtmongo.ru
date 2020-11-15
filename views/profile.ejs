@@ -19,6 +19,21 @@
             Список загруженных файлов
         </span>
     </div>
+    <div id='promise chous'>
+        <!--h2>Your available files</h2-->
+        <table class="tables">
+            <thead>
+                <tr>
+                    <td>Имя файла</td>
+                    <td>Размер (kb)</td>
+                    <td>Тип</td>
+                    <td>Время загрузки</td>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+    </div>
 
 <%- include('partials/footer'); -%>
 
@@ -96,28 +111,42 @@
     }
 
     document.querySelector('#getList').onclick = async () => {
-     /*   let table = document.querySelector('#tbody'), row;
-            try {
-                const response = await fetch('/getList', {
-                    method: 'GET',
-                });
-                const result = await response.json();
-                //const result = await response;
-                console.log('Успех:', result);
-                table.innerHTML = '';
-                result.queryData.forEach(item => {
-                    row = table.insertRow();
-                    row.insertCell().innerHTML = item.path_file;
-                })
-                //console.log('Успех:', JSON.stringify(result));
-            } catch (error) {
-                console.error('Ошибка:', error);
-            }*/
-     getFilesList();
+        let table = document.querySelector('#tbody'),
+            row;
+        
+        const result = await getFilesList();
+        console.log('----fileTables:', result);
+        table.innerHTML = '';
+        result.forEach(item => {
+             row = table.insertRow();
+             row.id = item._id;
+             row.setAttribute('onclick', 'fileInfo(this)');
+             row.insertCell().innerHTML = item.name;
+             row.insertCell().innerHTML = (item.size / (1024)).toFixed(2);
+             row.insertCell().innerHTML = item.mime;
+             row.insertCell().innerHTML = item.data;
+        });
     }
     
+    async function fileInfo(row) {
+        const file = fileList.filter(({ _id }) => _id === row.id);
+        console.log('----fileInfo',file);
+        try {
+            response = await fetch ('/file/'+ row.id, {
+                method: 'GET',
+            });
+            const result = await response.json();
+            console.log('Успех:', result);
+            alert(JSON.stringify(result.fileinfo[0]));
+        } catch (error) {
+            console.error('Ошибка:', error);
+        }
+    }
     //getFilesList();
 
 </script>
+
+
+
 
 

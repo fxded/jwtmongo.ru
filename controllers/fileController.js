@@ -132,3 +132,19 @@ module.exports.filesList_get = async (req, res) => {
     res.status(200).json({ list: user.userfiles });
     
 }
+
+module.exports.fileInfo_get = async (req, res) => {
+    let user;
+    
+    try {
+        user = await User.findById(res.locals.user._id);
+        
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({ errors });
+        console.error('----filesList_getError',err);
+    }
+    const file = user.userfiles.filter(({ _id }) => _id == req.params.id);
+    console.log('----get file info', file, req.params.id);
+    res.status(200).json({ fileinfo: file });
+}

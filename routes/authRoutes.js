@@ -16,5 +16,6 @@ router.get('/info', requireAuth, authController.info_get);
 router.post('/file/upload', requireAuth, fileController.fileUpload_post);
 router.get('/file/list', requireAuth, fileController.filesList_get);
 router.put('/file/update/:id', requireAuth, fileController.fileUpdate_put);
+router.get('/file/:id', requireAuth, fileController.fileInfo_get);
 
 module.exports = router;
