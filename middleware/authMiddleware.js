@@ -19,7 +19,7 @@ const requireAuth = async (req, res, next) => {
         res.redirect('/login');
       } else {
         res.locals.user = decodedToken.user;
-        console.log(decodedToken);
+        console.log({ user:decodedToken.user.email });
         next();
       }
     });
@@ -65,12 +65,12 @@ const checkUser = (req, res, next) => {
         res.locals.user = null;
         next();
       } else {
-        console.log('---decodedToken', decodedToken);
+        console.log('---decodedToken', { user: decodedToken.user.email });
         try {
             let user = await User.findById(decodedToken.user.id);
             res.locals.user = user;
             const decodedRefToken = await jwt.verify(refToken, config.rtPhrase);
-            console.log('---decodedRefToken:', decodedRefToken);
+            console.log('---decodedRefToken:', { user: decodedRefToken.email });
         } catch (err) {
             console.log('----checkUserError', err);
         }

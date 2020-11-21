@@ -67,7 +67,7 @@ module.exports.fileUpload_post = async (req, res) => {
             data    : new Date()
         });
         updatedUser = await userMongo.save();
-        console.log('---mongoUser', updatedUser);
+        console.log(`---mongoUser:`, { mongoUser: updatedUser.email });
         //res.writeHead(303, { Connection: 'close', Location: '/' });
     } catch (err) {
         const errors = handleErrors(err);
@@ -75,7 +75,7 @@ module.exports.fileUpload_post = async (req, res) => {
         console.error('----uploaderr',err);
     }
     
-    console.log('----uploads files', dataFile, user._id, filePath);
+    console.log('----uploads files', { name: dataFile.name, userId: user._id, path: filePath });
     res.status(200).json({ list: updatedUser.userfiles });
     //res.render('profile');
     //res.end()
@@ -87,28 +87,28 @@ module.exports.fileUpdate_put = async (req, res) => {
                         + '/userdata/'
                         + res.locals.user._id 
                         +'/';
-    let     userMongo;
+    let     userMongo,
+            updatedUser;
     
     try {
+        userMongo = await User.findById(res.locals.user._id);
         await dataFile.mv(filePath + dataFile.name);
-        const updFileList = res.locals.user.userfiles.map(item => {
-            if (item._id === req.params.id) {
+        userMongo.userfiles = [...userMongo.userfiles].map(item => {
+            if (item._id == req.params.id) {
                 item.size = dataFile.size;
                 item.mime = dataFile.mimetype;
                 item.data = new Date();
-                console.log('--updateFileINARR', item);
+                console.log('--updateFileINARR', { file:item.name });
             }
             return item;
         });
-        const userMongo = await User.findById(res.locals.user._id);
-        userMongo.userfiles = updFileList;
         updatedUser = await userMongo.save();
     } catch (err) {
         const errors = handleErrors(err);
         res.status(400).json({ errors });
         console.error('----updateFileErr',err);
     }
-    console.log('---fileUpdate',req.params.id, req.files.file);
+    console.log('---fileUpdate',{ fileid:req.params.id, filename:req.files.file.name });
     res.send({  
         id: req.params.id,
         user: updatedUser._id,
@@ -145,6 +145,42 @@ module.exports.fileInfo_get = async (req, res) => {
         console.error('----filesList_getError',err);
     }
     const file = user.userfiles.filter(({ _id }) => _id == req.params.id);
-    console.log('----get file info', file, req.params.id);
+    console.log('----get file info', { file:file[0].name, id:req.params.id });
     res.status(200).json({ fileinfo: file });
+}
+
+module.exports.fileDelete_delete = async (req, res) => {
+    const   filePath    = __dirname.split('/').slice(0,4).join('/')
+                        + '/userdata/'
+                        + res.locals.user._id 
+                        +'/';
+    let     userMongo,
+            updatedUser,
+            fileToDelete;
+    
+    try {
+        userMongo = await User.findById(res.locals.user._id);
+        fileToDelete = [...userMongo.userfiles].filter(({ _id }) => _id == req.params.id);
+        userMongo.userfiles = [...userMongo.userfiles].filter(({ _id }) => _id != req.params.id);
+        updatedUser = await userMongo.save();
+        console.log('+++++++++', {
+                    delete: fileToDelete[0].name,
+                    userfiles: updatedUser.userfiles
+        });
+        await fs.promises.unlink(filePath + fileToDelete[0].name);
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({ errors });
+        console.error('----updateFileErr',err);
+    }
+    console.log('---fileDelete', {
+        fileid: req.params.id, 
+        path: filePath+fileToDelete[0].name
+    });
+    res.send({  
+        id: req.params.id,
+        user: updatedUser._id,
+        list: updatedUser.userfiles
+    });
+    res.end();
 }

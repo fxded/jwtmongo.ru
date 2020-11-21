@@ -194,3 +194,18 @@ footer{
     width: 150px;
     cursor: pointer;
 }
+.dada {
+    padding: 0;
+    width: auto;
+    display: flex;
+    flex-flow: nowrap;
+    align-items: center;
+}
+.dada > .chous {
+    width: 100%;
+    margin: 0px 25px;
+}
+.dada span {
+    width: auto;
+    display: block;
+}
