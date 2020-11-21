@@ -18,5 +18,6 @@ router.get('/file/list', requireAuth, fileController.filesList_get);
 router.put('/file/update/:id', requireAuth, fileController.fileUpdate_put);
 router.get('/file/:id', requireAuth, fileController.fileInfo_get);
 router.delete('/file/delete/:id', requireAuth, fileController.fileDelete_delete);
+router.get('/file/download/:id', requireAuth, fileController.fileDownload_download);
 
 module.exports = router;

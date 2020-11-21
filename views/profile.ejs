@@ -150,10 +150,30 @@
         }
     }
     
-    document.querySelector('#info').onclick = function() {
+    document.querySelector('#download').onclick = async function() {
         console.log(this.fileId);
         if (this.fileId) {
-            fileInfo(this.fileId);
+            try {
+                response = await fetch ('/file/download/'+ this.fileId, {
+                    method: 'GET',
+                });
+                const result = await response.blob();
+                let file = await window.URL.createObjectURL(result);
+                const filename = decodeURIComponent(
+                    response.headers.get('content-disposition').split('filename=')[1]
+                );
+                console.log('filedowload', file, filename);
+                let a = document.createElement('a');
+                a.href = file;
+                a.setAttribute('download', filename);
+                a.click();
+                a.remove();
+                //window.location.download(file);
+                
+                console.log('Успех:', result);
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
         }
     }
     

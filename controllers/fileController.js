@@ -171,7 +171,7 @@ module.exports.fileDelete_delete = async (req, res) => {
     } catch (err) {
         const errors = handleErrors(err);
         res.status(400).json({ errors });
-        console.error('----updateFileErr',err);
+        console.error('----deleteFileErr',err);
     }
     console.log('---fileDelete', {
         fileid: req.params.id, 
@@ -183,4 +183,44 @@ module.exports.fileDelete_delete = async (req, res) => {
         list: updatedUser.userfiles
     });
     res.end();
+}
+
+module.exports.fileDownload_download = async (req, res) => {
+    const   filePath    = __dirname.split('/').slice(0,4).join('/')
+                        + '/userdata/'
+                        + res.locals.user._id 
+                        +'/';
+    let     userMongo,
+            fileToDownload;
+    
+    try {
+        userMongo = await User.findById(res.locals.user._id);
+        fileToDownload = [...userMongo.userfiles].filter(({ _id }) => _id == req.params.id);
+        console.log('+++++++++', {
+                    download: fileToDownload[0].name,
+                    user: userMongo.email
+        });
+    const mime = fileToDownload[0].mime + "; charset=UTF-8";
+    const contDisp = "attachment; filename="+encodeURIComponent(fileToDownload[0].name);
+    console.log('----setDownload', { contType: mime, contDisp: contDisp });
+    res.writeHead(200, {
+        "Content-Type": mime,
+        "Content-Disposition": contDisp
+    });
+    fs.createReadStream(filePath + fileToDownload[0].name).pipe(res);
+    } catch (err) {
+        const errors = handleErrors(err);
+        res.status(400).json({ errors });
+        console.error('----downloadFileErr',err);
+    }
+    console.log('---fileDownload', {
+        fileid: req.params.id, 
+        path: filePath+fileToDownload[0].name
+    });
+    /*res.send({  
+        id: req.params.id,
+        user: updatedUser._id,
+        list: updatedUser.userfiles
+    });*/
+    //res.end();
 }
